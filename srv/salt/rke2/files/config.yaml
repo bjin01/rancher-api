@@ -1,0 +1,28 @@
+{% set masters = salt['pillar.get']('rke2:role:server', []) %}
+{% set agents = salt['pillar.get']('rke2:role:agents', []) %}
+{% set this_minion = salt['grains.get']('id', '') %}
+{% set first_node = salt['pillar.get']('rke2:first_node') %}
+{% set token = salt['pillar.get']('rke2:token', []) %}
+{% set tls_san = salt['pillar.get']('rke2:tls_san', []) %}
+{% if this_minion in masters %}
+{% if this_minion != first_node %}
+server: https://{{ first_node }}:9345
+{% endif %}
+tls-san:
+{% for s in tls_san %}
+  - {{ s }}
+{% endfor %}
+{% for i in masters %}
+  - {{ i }}
+{% endfor %}
+token: {{ token }} 
+write-kubeconfig-mode: "0644"
+node-label:
+  - "staging_k8s=true"
+debug: true
+{% endif %}
+
+{% if this_minion in agents %}
+server: https://{{ first_node }}:9345
+token: {{ token }}
+{% endif %}

@@ -1,0 +1,1 @@
+{{ pillar['rke2']['root_bashrc'] }}
